@@ -1,0 +1,19 @@
+{
+  "name": "@ari/core",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "ARI deterministic core: DSD parsing, Audit Object Model, review engine.",
+  "main": "./dist/index.js",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

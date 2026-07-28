@@ -1,0 +1,68 @@
+# 소스를 고쳐 push 하면 → 여기서 앱을 빌드하고 → GitHub Pages 에 자동 배포한다.
+# 사용자는 Node 나 pnpm 을 설치할 필요가 없다. 빌드는 전부 GitHub 서버에서 일어난다.
+name: 배포 (build & deploy to Pages)
+
+on:
+  push:
+    branches: [main]
+  # Actions 탭에서 손으로도 돌릴 수 있게 한다 (배포만 다시 하고 싶을 때).
+  workflow_dispatch:
+
+# Pages 배포에 필요한 최소 권한.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치면 마지막 것만 살린다. 중간 것을 취소하지는 않는다(배포 중 중단 방지).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 의존성 설치
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 타입 검사 (엔진)
+        run: pnpm --filter @ari/core build
+
+      - name: 단일 파일 앱 빌드
+        run: pnpm --filter @ari/app run build:standalone
+
+      - name: Pages 로 낼 파일 모으기
+        run: |
+          mkdir -p _site
+          # 주소로 열면 바로 앱이 뜨도록 index.html 로 놓는다.
+          cp "감사보고서_검토.html" _site/index.html
+          # 내려받아 오프라인·폐쇄망에서 쓰고 싶은 사람을 위해 원래 이름으로도 둔다.
+          cp "감사보고서_검토.html" "_site/감사보고서_검토.html"
+          test -f README.md && cp README.md _site/README.md || true
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

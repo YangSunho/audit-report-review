@@ -1,0 +1,180 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>감사보고서 검토</title>
+<style>
+:root{--ink900:#191919;--ink800:#3D3D3D;--ink700:#777;--ink300:#E0E0E0;--ink200:#EFEFEF;--ink100:#F7F7F7;
+--blue:#1D4ED8;--bluebg:#EAF1FE;--green:#137A45;--greenbg:#E9F6EE;--red:#E5342F;--redbg:#FDECEB}
+*{box-sizing:border-box}
+body{margin:0;font-family:Pretendard,-apple-system,"Malgun Gothic","맑은 고딕",sans-serif;letter-spacing:-.01em;
+color:var(--ink900);background:#fff;font-size:15px;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:52px 24px 64px}
+h1{font-size:34px;font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
+.sub{color:var(--ink800);font-size:16px;margin:0 0 4px}
+.meta{color:var(--ink700);font-size:13px;margin:0 0 30px}
+.drop{border:2px dashed var(--ink300);border-radius:10px;padding:46px 24px;text-align:center;
+background:var(--ink100);transition:.15s;cursor:pointer}
+.drop.over{border-color:var(--blue);background:var(--bluebg)}
+.drop .big{font-size:17px;font-weight:800;margin-bottom:6px}
+.drop .small{color:var(--ink700);font-size:13px}
+.file{margin-top:14px;font-size:14px;color:var(--ink800)}
+.btn{display:inline-block;margin-top:16px;background:var(--ink900);color:#fff;border:0;border-radius:6px;
+padding:12px 26px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{background:var(--ink300);cursor:default}
+#log{margin-top:20px;display:none}
+.step{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;color:var(--ink700)}
+.step.done{color:var(--green);font-weight:700}
+.step.run{color:var(--blue);font-weight:700}
+.step .dot{width:9px;height:9px;border-radius:50%;background:var(--ink300);flex:none}
+.step.done .dot{background:var(--green)} .step.run .dot{background:var(--blue)}
+#result{margin-top:24px;display:none}
+.card{border:1px solid var(--ink300);border-radius:8px;padding:18px 20px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 18px}
+.sum div{background:var(--ink100);border-radius:6px;padding:12px 14px}
+.sum .l{font-size:12px;color:var(--ink700);font-weight:700}
+.sum .v{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.sum .v.red{color:var(--red)} .sum .v.green{color:var(--green)}
+.dl{display:flex;flex-wrap:wrap;gap:10px}
+.dl button{border:1px solid var(--ink300);background:#fff;border-radius:6px;padding:11px 18px;
+font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink900)}
+.dl button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.dl button:hover{border-color:var(--ink900)}
+.err{background:var(--redbg);border:1px solid var(--red);color:var(--red);border-radius:8px;padding:14px 16px;
+margin-top:18px;display:none;font-size:14px;white-space:pre-wrap}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--ink200);color:var(--ink700);font-size:12.5px}
+.credit{margin-top:22px;padding-top:14px;border-top:1px solid var(--ink200);
+color:var(--ink700);font-size:12px;line-height:1.9}
+#rperiod{font-size:13.5px;font-weight:700;color:var(--ink800);margin-top:4px;font-variant-numeric:tabular-nums}
+#rcaveat{font-size:12.5px;font-weight:700;color:#C0392B;margin-top:3px;display:none}
+</style></head><body><div class="wrap">
+
+<h1>📋 감사보고서 검토</h1>
+<p class="sub">DSD 파일을 넣으면 전수 대사·증감분석·심리 예상 질의를 자동으로 만들어 드립니다.</p>
+<p class="meta">모든 처리는 <b>이 브라우저 안에서만</b> 이루어집니다 · 파일은 어디에도 전송되지 않으며 원본은 변경되지 않습니다</p>
+
+<div class="drop" id="drop">
+  <div class="big">여기에 DSD 파일을 끌어다 놓으세요</div>
+  <div class="small">또는 클릭해서 파일 선택 · 감사보고서 .dsd (연결·별도 모두 가능)</div>
+  <input type="file" id="pick" accept=".dsd" style="display:none">
+  <div class="file" id="fname"></div>
+</div>
+
+<button class="btn" id="run" disabled>검토 시작</button>
+
+<div id="log">
+  <div class="step" data-k="read"><span class="dot"></span><span>파일 읽는 중</span></div>
+  <div class="step" data-k="parse"><span class="dot"></span><span>재무제표·주석 구조 분석</span></div>
+  <div class="step" data-k="engine"><span class="dot"></span><span>합계·참조·정합성 검증</span></div>
+  <div class="step" data-k="report"><span class="dot"></span><span>결과 문서 생성</span></div>
+</div>
+
+<div class="err" id="err"></div>
+
+<div id="result"><div class="card">
+  <div style="font-size:17px;font-weight:800" id="rtitle">검토 완료</div>
+  <div id="rperiod"></div>
+  <div id="rcaveat"></div>
+  <div class="sum" id="rsum"></div>
+  <div style="font-size:13px;color:var(--ink700);font-weight:700;margin-bottom:8px">결과 문서</div>
+  <div class="dl">
+    <button class="primary" id="b-view">검토 결과 보기</button>
+    <button id="b-xlsx">엑셀 워크북</button>
+    <button id="b-docx">워드 리포트</button>
+    <button id="b-md">텍스트</button>
+  </div>
+</div></div>
+
+<div class="foot">
+  <b>감사보고서 검토</b> · 전수 대사 결과와 근거를 함께 제공합니다.<br>
+  기계 검증은 오류를 단정하지 않으며, 확인이 필요한 항목을 근거와 함께 제시합니다.
+</div>
+
+<div class="credit" id="credit"></div>
+
+</div>
+<script>/*__ARI_BUNDLE__*/</script>
+<script>
+(function(){
+  // 개발자·버전 정보 — 문구는 core/brand.ts 한 곳에서 관리한다.
+  var C=ARI.CREDIT;
+  document.getElementById('credit').innerHTML=
+    '\u00A9 '+C.year+' '+C.author+' \u00B7 '+C.appName+' v'+C.version+' ('+C.released+') \u00B7 '+C.license
+    +'<br>DSD \uD30C\uC2F1\u00B7\uAC80\uC99D\u00B7\uBCF4\uACE0\uC11C \uC0DD\uC131\uC774 \uBAA8\uB450 \uC774 \uBE0C\uB77C\uC6B0\uC800 \uC548\uC5D0\uC11C \uC218\uD589\uB429\uB2C8\uB2E4.';
+  var drop=document.getElementById('drop'),pick=document.getElementById('pick'),
+      run=document.getElementById('run'),fname=document.getElementById('fname'),
+      log=document.getElementById('log'),err=document.getElementById('err'),
+      result=document.getElementById('result'),file=null,out=null;
+
+  function showErr(m){err.textContent=m;err.style.display='block';}
+  function step(k,s){var el=document.querySelector('[data-k="'+k+'"]');if(el)el.className='step '+s;}
+  function setFile(f){
+    if(!f)return;
+    if(!/\.dsd$/i.test(f.name)){showErr('DSD 파일(.dsd)만 넣을 수 있습니다: '+f.name);return;}
+    file=f;fname.innerHTML='선택된 파일: <b>'+f.name+'</b>';run.disabled=false;err.style.display='none';
+  }
+  drop.addEventListener('click',function(){pick.click();});
+  pick.addEventListener('change',function(e){setFile(e.target.files[0]);});
+  ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over');});});
+  ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over');});});
+  drop.addEventListener('drop',function(e){setFile(e.dataTransfer.files[0]);});
+
+  function dl(bytes,name,mime){
+    var blob=new Blob([bytes],{type:mime});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  }
+  document.getElementById('b-view').onclick=function(){
+    if(!out)return;
+    var w=window.open('','_blank');
+    w.document.write(out.dashboardHtml);w.document.close();
+  };
+  document.getElementById('b-xlsx').onclick=function(){if(out)dl(out.xlsx,'감사워크북.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');};
+  document.getElementById('b-docx').onclick=function(){if(out)dl(out.docx,'검토리포트.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document');};
+  document.getElementById('b-md').onclick=function(){if(out)dl(new TextEncoder().encode(out.markdown),'검토리포트.md','text/markdown');};
+
+  run.addEventListener('click',function(){
+    if(!file)return;
+    run.disabled=true;result.style.display='none';err.style.display='none';log.style.display='block';
+    ['read','parse','engine','report'].forEach(function(k){step(k,'');});
+    step('read','run');
+    var reader=new FileReader();
+    reader.onload=function(){
+      setTimeout(function(){
+        try{
+          step('read','done');step('parse','run');
+          var bytes=new Uint8Array(reader.result);
+          ARI.reviewInBrowser(bytes).then(function(r){
+            out=r;
+            ['read','parse','engine','report'].forEach(function(k){step(k,'done');});
+            document.getElementById('rtitle').textContent=(r.company||'')+' · '+(r.docName||'')+' 검토 완료';
+            document.getElementById('rperiod').textContent=r.period||'';
+            var cav=document.getElementById('rcaveat');
+            cav.textContent=r.periodCaveat||'';
+            cav.style.display=r.periodCaveat?'block':'none';
+            document.getElementById('rsum').innerHTML=
+              c('검증 일치율',r.score+'%','green')+
+              c('확인 필요',r.review+'건',r.review>0?'':'green')+
+              c('불일치',r.mismatch+'건',r.mismatch>0?'red':'green')+
+              c('수행한 검증',r.total+'건','');
+            result.style.display='block';run.disabled=false;
+            document.getElementById('b-view').click();
+          }).catch(function(e){fail(e);});
+        }catch(e){fail(e);}
+      },50);
+    };
+    reader.onerror=function(){fail(new Error('파일을 읽지 못했습니다.'));};
+    reader.readAsArrayBuffer(file);
+  });
+  function fail(e){
+    ['read','parse','engine','report'].forEach(function(k){
+      var el=document.querySelector('[data-k="'+k+'"]');
+      if(el&&el.className.indexOf('done')<0)el.className='step';});
+    var m=(e&&e.message)||String(e);
+    showErr(/zip|contents\.xml|EOCD/i.test(m)
+      ? 'DSD 파일을 읽을 수 없습니다. 올바른 감사보고서 DSD 파일인지 확인해 주세요.\n\n('+m+')'
+      : '검토 중 오류가 발생했습니다.\n\n'+m);
+    run.disabled=false;
+  }
+  function c(l,v,cls){return '<div><div class="l">'+l+'</div><div class="v '+cls+'">'+v+'</div></div>';}
+})();
+</script></body></html>
