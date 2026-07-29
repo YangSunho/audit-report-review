@@ -97,7 +97,8 @@ color:var(--ink700);font-size:12px;line-height:1.9}
   // 개발자·버전 정보 — 문구는 core/brand.ts 한 곳에서 관리한다.
   var C=ARI.CREDIT;
   document.getElementById('credit').innerHTML=
-    '\u00A9 '+C.year+' '+C.author+' \u00B7 '+C.appName+' v'+C.version+' ('+C.released+') \u00B7 '+C.license
+    '\u00A9 '+C.year+' '+C.author+' \u00B7 '+C.appName+' v'+C.version+' ('+C.released+')'
+    +'<br>'+C.disclaimer
     +'<br>DSD \uD30C\uC2F1\u00B7\uAC80\uC99D\u00B7\uBCF4\uACE0\uC11C \uC0DD\uC131\uC774 \uBAA8\uB450 \uC774 \uBE0C\uB77C\uC6B0\uC800 \uC548\uC5D0\uC11C \uC218\uD589\uB429\uB2C8\uB2E4.';
   var drop=document.getElementById('drop'),pick=document.getElementById('pick'),
       run=document.getElementById('run'),fname=document.getElementById('fname'),

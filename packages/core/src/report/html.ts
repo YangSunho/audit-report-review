@@ -18,7 +18,7 @@ import {
   APP_VERSION,
   AUTHOR,
   COPYRIGHT_YEAR,
-  LICENSE,
+  DISCLAIMER,
 } from "../brand.js";
 import type { ParsedDocument } from "../dsd/parser.js";
 
@@ -389,7 +389,8 @@ ${varianceHtml}
 <div class="foot">검토 대상: ${esc(company ?? "")}${fiscal ? ` · ${esc(fiscal.label)}` : ""}<br>
 원본 파일 해시: ${esc(engine.dsdFileHash)} · 검토 엔진 ${esc(engine.engineVersion)} · 모든 수치는 원문에서 그대로 인용했으며 원본 파일은 변경하지 않았습니다.</div>
 
-<div class="credit">© ${COPYRIGHT_YEAR} ${esc(AUTHOR)} · ${esc(APP_FULL_NAME)} v${APP_VERSION} (${APP_RELEASED}) · ${esc(LICENSE)}<br>
+<div class="credit">© ${COPYRIGHT_YEAR} ${esc(AUTHOR)} · ${esc(APP_FULL_NAME)} v${APP_VERSION} (${APP_RELEASED})<br>
+${esc(DISCLAIMER)}<br>
 DSD 파싱·검증·보고서 생성이 모두 사용자 PC의 브라우저 안에서 수행되며, 감사 대상 자료는 외부로 전송되지 않습니다.</div>
 </div>
 <script>

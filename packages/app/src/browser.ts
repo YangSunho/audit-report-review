@@ -14,7 +14,7 @@ import {
   APP_VERSION,
   AUTHOR,
   COPYRIGHT_YEAR,
-  LICENSE,
+  DISCLAIMER,
 } from "../../core/src/brand.js";
 import {
   buildAuditReport,
@@ -103,7 +103,7 @@ export const CREDIT = {
   version: APP_VERSION,
   released: APP_RELEASED,
   year: COPYRIGHT_YEAR,
-  license: LICENSE,
+  disclaimer: DISCLAIMER,
 };
 
 /** Run the full review over an uploaded file, entirely in the page. */
