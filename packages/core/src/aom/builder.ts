@@ -346,7 +346,14 @@ function buildFsTable(
     provenance: prov("rule:structural", "high"),
     statement,
     ...(note ? { note } : {}),
-    ...(pt.caption ? { caption: pt.caption } : {}),
+    // 캡션은 **주석 표에만** 붙인다. 한 주석 안에 표가 여럿일 때 어느 표인지
+    // 가리키려고 앞 문단에서 가져오는 장치이기 때문이다("22.3 …변동내역").
+    //
+    // 재무제표 본표(BS/IS/CF/SCE)는 제목이 곧 이름이므로 캡션이 필요 없고,
+    // 붙이면 오히려 해롭다 — 본표 앞 문단은 감사보고서 본문이라서
+    // "이 감사보고서의 근거가 된 감사를 실시한 업무수행이사는 …입니다" 같은
+    // 문장이 재무상태표의 이름으로 표시된 사례가 있었다.
+    ...(statement === "NOTE" && pt.caption ? { caption: pt.caption } : {}),
     tableType,
     period: ctx.period.prior
       ? { current: ctx.period.current, prior: ctx.period.prior }

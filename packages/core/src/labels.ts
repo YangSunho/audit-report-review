@@ -33,6 +33,12 @@ export function noteTitleMap(objects: AomObject[]): Map<string, string> {
  */
 export function captionLabel(caption: string | undefined, noteNo?: string): string {
   if (!caption) return "";
+  // 소제목 뒤에 설명 문단이 줄바꿈으로 이어붙는 경우가 많다:
+  //   "37.2.1 매출채권 및 기타채권\n\n당사는 신용거래를 희망하는 모든 거래상대방에…"
+  // 첫 줄이 소제목 꼴(22.3 …)이면 거기서 끊는다. 뒤 문장은 위치를 가리키는 데
+  // 아무 도움이 안 되고 표 이름만 길어진다.
+  const firstLine = caption.trim().split("\n")[0]!.trim();
+  if (/^\d+(\.\d+)*[.\s]/.test(firstLine) && firstLine.length >= 4) caption = firstLine;
   let s = caption.trim().replace(/\s+/g, " ");
   // Drop a leading repetition of the note heading ("30. 법인세 30.1 …" → "30.1 …")
   // so the label doesn't read "주석30. 법인세 — 30. 법인세 30.1 …".

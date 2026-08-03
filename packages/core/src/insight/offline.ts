@@ -30,7 +30,13 @@ interface Template {
 }
 
 /** Deterministic template selection by check type. `figs` is a pre-quoted string. */
-function template(check: string, figs: string, noteLabel: string): Template {
+/**
+ * `finding` 은 검증이 스스로 남긴 설명(ReviewResult.note)이다. 템플릿이 없는
+ * 검증에서 이것을 쓰지 않으면 "…에 대해 다음을 확인해 보십시오(628,301,606,274 /
+ * 317,907,587,604)" 처럼 숫자만 던지게 되어 읽는 사람이 무엇을 확인해야 할지
+ * 알 수 없다. 검증이 이미 문장으로 설명해 두었으므로 그것을 그대로 쓴다.
+ */
+function template(check: string, figs: string, noteLabel: string, finding: string): Template {
   switch (check) {
     case "RollForward":
       return {
@@ -57,6 +63,22 @@ function template(check: string, figs: string, noteLabel: string): Template {
         rationale: `유형자산·투자부동산 등 자산별 감가상각비의 합이 비용 분류 및 현금흐름의 가산조정과 연결되어야 합니다.`,
         potentialRisk: `집계 범위나 표시단위가 다르면 비용·현금흐름 표시에 영향이 있을 수 있어 추가 검토가 권장됩니다.`,
       };
+    case "FsTreeFooting":
+      return {
+        question: `${finding || noteLabel}`,
+        rationale: `재무제표 본표의 계층을 재구성해 최하위 구성항목부터 소계·총계까지 대조한 결과입니다. 구성항목 누락, 소계 자리 오류, 표시단위 차이가 원인일 수 있습니다.`,
+        potentialRisk: `표시된 총계는 맞더라도 구성항목이 어긋나 있으면 세부 표시가 잘못된 것이므로 원문 확인이 필요합니다.`,
+      };
+    case "EquityRollForward":
+    case "EquityToBs":
+    case "NetIncomeToEquity":
+    case "ComprehensiveIncomeToEquity":
+    case "DividendToCashFlow":
+      return {
+        question: `${finding || noteLabel}`,
+        rationale: `자본변동표를 축으로 재무상태표·손익계산서·현금흐름표를 맞대어 본 결과입니다. 전기(轉記) 누락이나 표시 부호 관행 차이가 원인일 수 있습니다.`,
+        potentialRisk: `재무제표 간 연계가 어긋나면 어느 한쪽의 표시가 잘못된 것이므로 확인이 권장됩니다.`,
+      };
     case "ReferenceResolve":
       return {
         question: `참조 대상 주석을 해석할 수 없습니다(${figs || "대상 주석 부재"}). 참조 번호가 올바른지, 대상 주석이 존재하는지 확인해 보십시오.`,
@@ -65,7 +87,8 @@ function template(check: string, figs: string, noteLabel: string): Template {
       };
     default:
       return {
-        question: `${noteLabel}에 대해 다음을 확인해 보십시오(${figs}).`,
+        // 검증이 남긴 설명이 있으면 그것이 가장 정확하다. 없을 때만 숫자로 물러난다.
+        question: finding || `${noteLabel}에 대해 다음을 확인해 보십시오(${figs}).`,
         rationale: `엔진이 이상 신호를 표시했으나 기계적으로 오류를 단정할 수는 없습니다.`,
         potentialRisk: `관련 표시의 정합성에 영향이 있을 수 있어 추가 검토가 권장됩니다.`,
       };
@@ -99,7 +122,9 @@ export class OfflineGroundedProvider implements InsightProvider {
     const figs = resultFigs.join(" / ");
     const noteLabel = evidence[0]?.label ?? "해당 표";
 
-    const t = template(check, figs, noteLabel);
+    // 검증이 남긴 설명. Issue.title 은 ReviewResult.note 를 그대로 옮긴 것이다.
+    const finding = (primary?.note ?? issue.title ?? "").trim();
+    const t = template(check, figs, noteLabel, finding);
 
     // Confidence (§7): more independent evidence → higher.
     const confidence = evidence.length >= 2 ? "medium" : "low";
