@@ -97,6 +97,11 @@ padding:11px 22px;font-weight:600;font-size:14px;cursor:pointer;font-family:inhe
 .err{background:var(--red-bg);border:1px solid #F4DADA;color:var(--red-ink);border-radius:var(--r-xl);
 padding:18px 20px;margin-top:20px;display:none;font-size:13.5px;white-space:pre-wrap;line-height:1.6}
 
+.fine{margin-top:44px;padding-top:20px;border-top:1px solid var(--hairline-soft);
+font-size:12px;line-height:1.75;color:var(--steel);max-width:620px}
+.fine p{margin:0 0 8px}
+.fine p:last-child{margin-bottom:0}
+.fine b{color:var(--slate);font-weight:600}
 .foot{margin-top:56px;padding:24px 28px;border-radius:var(--r-xl);background:var(--surface);
 color:var(--slate);font-size:12.5px;line-height:1.85}
 .foot b{color:var(--ink);font-weight:600}
@@ -114,7 +119,7 @@ color:rgba(255,255,255,.66);font-size:12px;line-height:1.9}
 .hero{padding:26px 22px}#rtitle{font-size:21px}}
 </style></head><body>
 
-<div class="nav"><span class="mark">ARI<small>감사보고서 검토</small></span>
+<div class="nav"><span class="mark">ARI<small>Audit Review Intelligence</small></span>
 <span style="margin-left:auto"></span><span class="pill">내 PC에서 처리</span></div>
 
 <div class="shell">
@@ -191,6 +196,13 @@ color:rgba(255,255,255,.66);font-size:12px;line-height:1.9}
   </div>
 </div>
 
+
+  <div class="fine">
+    <p><b>오류를 단정하지 않습니다.</b> 기계가 확정할 수 있는 것만 오류로 표시하고,
+    나머지는 근거와 함께 "확인이 필요한 항목"으로 제시합니다.
+    읽어내지 못한 부분이 있으면 결과보다 먼저 알립니다.</p>
+    <p id="credit"></p>
+  </div>
 </main>
 
 <aside class="rail right">
@@ -204,16 +216,6 @@ color:rgba(255,255,255,.66);font-size:12px;line-height:1.9}
     파일은 어디에도 전송되지 않고, 원본은 변경되지 않습니다.
     파일 해시를 결과에 기록해 무변경을 증명합니다.</div>
   </section>
-  <section>
-    <h4>판정 원칙</h4>
-    <div class="note"><b>오류를 단정하지 않습니다.</b> 기계가 확정할 수 있는 것만
-    오류로 표시하고, 나머지는 근거와 함께 "확인이 필요한 항목"으로 제시합니다.
-    읽어내지 못한 부분이 있으면 결과보다 먼저 알립니다.</div>
-  </section>
-  <section>
-    <h4>면책</h4>
-    <div class="note" id="credit"></div>
-  </section>
 </aside>
 
 </div>
@@ -223,8 +225,7 @@ color:rgba(255,255,255,.66);font-size:12px;line-height:1.9}
   // 앱 정보 레일 — 문구·버전은 core/brand.ts 한 곳에서 관리한다.
   var C=ARI.CREDIT;
   document.getElementById('appinfo').innerHTML=
-    kv('이름', C.appName.split(' — ')[0])
-    +kv('버전','v'+C.version)
+    kv('버전','v'+C.version)
     +kv('배포일',C.released)
     +kv('제작',C.author)
     +kv('라이선스','MIT');
