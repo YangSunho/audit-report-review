@@ -11,6 +11,7 @@ import { checkMechanical } from "./mechanical.js";
 import { checkReferences } from "./reference.js";
 import { checkFsIntegrity } from "./integrity.js";
 import { checkArticulation } from "./articulation.js";
+import { checkFsTreeFooting } from "./fstree.js";
 import { checkRelational } from "./relational.js";
 import { severityFor } from "./rules.js";
 import type { RelationshipEdge } from "../aom/types.js";
@@ -53,6 +54,12 @@ export function runEngine(model: AomModel, insightOpts: InsightOptions = {}): En
   results.push(...checkFsIntegrity(objects));
   // ⑥ Articulation — 재무제표 간 연계성 (자본변동표 ↔ 재무상태표 ↔ 손익 ↔ 현금흐름).
   results.push(...checkArticulation(objects));
+  // ⑦ 본표 계층 전수 Footing — 최하위 구성항목부터 소계·총계까지 바닥에서 쌓아 대조.
+  //    표시된 총계끼리만 맞추면 구성항목 누락을 놓친다(실제 표본으로 확인됨).
+  for (const o of objects) {
+    if (o.objectType === "FinancialStatementTable" && o.statement !== "NOTE")
+      results.push(...checkFsTreeFooting(o));
+  }
   // ③ Cross-Note + ④ Cash Flow (relational, run after standalone checks — §8).
   const relational = checkRelational(objects);
   results.push(...relational.results);

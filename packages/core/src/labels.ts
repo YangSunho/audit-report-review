@@ -93,6 +93,7 @@ export function humanLocation(o: AomObject, notes: Map<string, string>): string 
 export const CHECK_KO: Record<string, string> = {
   FsBalance: "대차평균 (자산총계 = 부채와자본총계)",
   FsBalanceComponents: "대차평균 (자산총계 = 부채총계 + 자본총계)",
+  FsTreeFooting: "구성항목 합계 (계층 전수)",
   FsAnchor: "요약수치 대사",
   EquityRollForward: "자본변동 대사 (기초+변동=기말)",
   EquityToBs: "자본변동표 ↔ 재무상태표",

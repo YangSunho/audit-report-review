@@ -48,6 +48,7 @@ const FS_SECTION_CHECKS = new Set([
   "FsBalance",
   "FsBalanceComponents",
   "FsAnchor",
+  "FsTreeFooting",
   "EquityRollForward",
   "EquityToBs",
   "NetIncomeToEquity",

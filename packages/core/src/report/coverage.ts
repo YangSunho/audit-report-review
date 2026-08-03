@@ -23,6 +23,8 @@ export const CHECK_METHOD: Record<string, string> = {
   ReferenceResolve: "본문·표의 주석 참조번호가 실제 존재하는 주석을 가리키는지 대조",
   FsBalance: "재무상태표 자산총계와 부채와자본총계를 1원 단위로 대조",
   FsBalanceComponents: "자산총계 = 부채총계 + 자본총계 성립 여부 확인",
+  FsTreeFooting:
+    "재무제표 본표의 계층을 재구성해 최하위 구성항목부터 소계·총계까지 각 단계의 합계를 대조 (당기·전기 각각)",
   EquityRollForward: "자본변동표의 자본 항목별로 기초잔액 + 당기 변동 = 기말잔액 확인",
   EquityToBs: "자본변동표 기말잔액을 재무상태표의 자본 각 계정과 대조",
   NetIncomeToEquity: "손익계산서 당기순이익이 자본변동표에 그대로 전기되었는지 대조",
