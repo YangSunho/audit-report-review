@@ -74,7 +74,7 @@ export function checkFsIntegrity(objects: AomObject[]): ReviewResult[] {
         expected: a,
         actual: le,
         sourceRefs: [assetTotal.source.xmlPath, liabEquityTotal.source.xmlPath],
-        ...(a === le ? {} : { note: `대차 불일치: 자산총계 ${a} ≠ 부채와자본총계 ${le}` }),
+        ...(a === le ? {} : { note: `대차 불일치: 자산총계 ${fmtWon(a)} ≠ 부채와자본총계 ${fmtWon(le)}` }),
       }),
     );
   }
@@ -116,9 +116,10 @@ export function checkFsIntegrity(objects: AomObject[]): ReviewResult[] {
         actual: line.amount.current.value,
         toleranceApplied: MILLION,
         sourceRefs: [line.source.xmlPath],
+        // 감사인은 자릿수를 세지 않는다. 376781 은 읽을 수 없고 376,781 은 읽힌다.
         note: ok
-          ? `${label} ≈ ${code} ${anchorVal}백만원`
-          : `표지 요약(${code} ${anchorVal}백만원)이 감사받은 ${label} 당기(${actualMillions}백만원)과 상이 — 재무제표 값이 기준이며 표지 요약수치 확인이 권장됩니다`,
+          ? `${label} ≈ ${code} ${fmtWon(anchorVal)}백만원`
+          : `표지 요약(${code} ${fmtWon(anchorVal)}백만원)이 감사받은 ${label} 당기(${fmtWon(actualMillions)}백만원)과 상이 — 재무제표 값이 기준이며 표지 요약수치 확인이 권장됩니다`,
       }),
     );
   };

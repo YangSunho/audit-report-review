@@ -36,7 +36,13 @@ interface Template {
  * 317,907,587,604)" 처럼 숫자만 던지게 되어 읽는 사람이 무엇을 확인해야 할지
  * 알 수 없다. 검증이 이미 문장으로 설명해 두었으므로 그것을 그대로 쓴다.
  */
-function template(check: string, figs: string, noteLabel: string, finding: string): Template {
+function template(
+  check: string,
+  figs: string,
+  noteLabel: string,
+  finding: string,
+  status: string,
+): Template {
   switch (check) {
     case "RollForward":
       return {
@@ -80,11 +86,21 @@ function template(check: string, figs: string, noteLabel: string, finding: strin
         potentialRisk: `재무제표 간 연계가 어긋나면 어느 한쪽의 표시가 잘못된 것이므로 확인이 권장됩니다.`,
       };
     case "ReferenceResolve":
-      return {
-        question: `참조 대상 주석을 해석할 수 없습니다(${figs || "대상 주석 부재"}). 참조 번호가 올바른지, 대상 주석이 존재하는지 확인해 보십시오.`,
-        rationale: `참조 번호 오기 또는 주석 누락이 원인일 수 있습니다.`,
-        potentialRisk: `참조 정합성이 확보되지 않으면 공시 연결성에 영향이 있을 수 있어 추가 검토가 권장됩니다.`,
-      };
+      // 참조 검증은 성격이 다른 두 결과를 낸다. 하나로 묶어 쓰면 거짓말이 된다 —
+      //   · mismatch: 대상 주석은 **존재하나** 다른 주제다 (번호 오기)
+      //   · review  : 참조가 가리키는 주석이 **없다** (미해석)
+      // 실제로 반기보고서에서 주석이 멀쩡히 있는데 "대상 주석 부재"라고 표시됐다.
+      return status === "mismatch"
+        ? {
+            question: finding || `주석 참조 번호가 대상 주석의 주제와 맞지 않습니다.`,
+            rationale: `연차보고서에서 옮겨 오면서 주석 번호를 갱신하지 않았거나, 주석이 추가·삭제된 뒤 본문 참조가 따라가지 못한 경우에 나타납니다. 이런 오기는 한 곳에서 시작해 이후 항목이 함께 밀리는 형태로 나타나는 경우가 많으므로 전체 참조를 함께 보시기 바랍니다.`,
+            potentialRisk: `이용자가 잘못된 주석으로 안내되어 공시 연결성이 훼손됩니다. 번호만 고치면 되는 경우가 대부분이나 누락된 주석이 있는지도 함께 확인이 필요합니다.`,
+          }
+        : {
+            question: finding || `참조 대상 주석을 찾을 수 없습니다(${figs || "대상 주석 부재"}). 참조 번호가 올바른지, 대상 주석이 존재하는지 확인해 보십시오.`,
+            rationale: `참조 번호 오기 또는 주석 누락이 원인일 수 있습니다.`,
+            potentialRisk: `참조 정합성이 확보되지 않으면 공시 연결성에 영향이 있을 수 있어 추가 검토가 권장됩니다.`,
+          };
     default:
       return {
         // 검증이 남긴 설명이 있으면 그것이 가장 정확하다. 없을 때만 숫자로 물러난다.
@@ -124,7 +140,7 @@ export class OfflineGroundedProvider implements InsightProvider {
 
     // 검증이 남긴 설명. Issue.title 은 ReviewResult.note 를 그대로 옮긴 것이다.
     const finding = (primary?.note ?? issue.title ?? "").trim();
-    const t = template(check, figs, noteLabel, finding);
+    const t = template(check, figs, noteLabel, finding, primary?.status ?? "review");
 
     // Confidence (§7): more independent evidence → higher.
     const confidence = evidence.length >= 2 ? "medium" : "low";

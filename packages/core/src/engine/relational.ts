@@ -171,17 +171,24 @@ export function checkCashFlow(objects: AomObject[]): RelationalReport {
       ),
     );
     const cfVal = Math.abs(cfPpeAcq.amount.current.value);
+    const diff = Math.abs(cfVal - ppeAcq.value);
+    // 상태를 "review" 로 못박아 두면 **두 값이 같아도** 검토 권장으로 나온다.
+    // 실제로 차액 0원인데 확인이 필요한 항목으로 표시됐다. 값이 일치하면 일치다.
+    // 차이가 있을 때만 §5 에 따라 단정하지 않고 확인을 권한다(비현금취득·미지급금).
+    const same = diff === 0;
     results.push(
       rr(
         "relational:cf-ppe-acq",
         "CashFlowPpeAcq",
-        "review", // §5: 비현금취득·미지급·표시단위 차이로 즉시 오류 단정 불가
+        same ? "match" : "review",
         [cfPpeAcq.id, ppeAcq.table.id],
         [cfPpeAcq.source.xmlPath, ppeAcq.table.source.xmlPath],
         {
           expected: ppeAcq.value,
           actual: cfVal,
-          note: `유형자산 취득 대사(검토 권장): CF ${fmtWon(cfVal)}원 vs 주석 취득 ${fmtWon(ppeAcq.value)}원 (차액 ${fmtWon(Math.abs(cfVal - ppeAcq.value))}원 — 비현금취득·미지급금 조정 여부 확인)`,
+          note: same
+            ? `유형자산 취득 ${fmtWon(cfVal)}원이 현금흐름표와 유형자산 주석에서 일치`
+            : `유형자산 취득 대사(검토 권장): CF ${fmtWon(cfVal)}원 vs 주석 취득 ${fmtWon(ppeAcq.value)}원 (차액 ${fmtWon(diff)}원 — 비현금취득·미지급금 조정 여부 확인)`,
         },
       ),
     );
