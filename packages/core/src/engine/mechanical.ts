@@ -321,7 +321,27 @@ export function checkFooting(
   const totalRows = body.filter((r) => isTotalLabel(r.label));
   if (totalRows.length !== 1) return [];
   const totalRow = totalRows[0]!;
-  const dataRows = body.filter((r) => r !== totalRow && !isTotalLabel(r.label));
+  // 합계행이 표 **중간**에 있으면, 그 뒤 행들은 같은 금액을 다른 기준으로 다시
+  // 보여주는 재표시다. 리스부채 주석이 전형이다 —
+  //   유동리스부채 177,395 / 비유동리스부채 128,712 / 리스부채 합계 306,107
+  //   1년 이내 177,395 / 1년 초과 5년 미만 128,712   ← 같은 금액의 만기별 재표시
+  // 전부 더하면 합계의 정확히 2배가 되어 멀쩡한 표가 오류로 나온다.
+  // 그래서 합계행 **앞의 행들만** 그 합계의 구성항목으로 본다.
+  const totalIdx = body.indexOf(totalRow);
+  const before = body.slice(0, totalIdx).filter((r) => !isTotalLabel(r.label));
+  const allRows = body.filter((r) => r !== totalRow && !isTotalLabel(r.label));
+  // 기본은 전체 행이다. 다만 앞쪽 행만으로 합계가 정확히 맞고 전체로는 맞지 않으면,
+  // 뒤쪽은 재표시로 보고 앞쪽만 쓴다 — 추측이 아니라 산술로 확인한 뒤에만 바꾼다.
+  const sumOf = (rows: TableRow[], c: number): number =>
+    rows.reduce((s, r) => s + cellValue(r, c), 0);
+  const firstCol = numericColumns(table).find((c) => hasNumber(totalRow, c));
+  const restated =
+    before.length >= 2 &&
+    before.length < allRows.length &&
+    firstCol !== undefined &&
+    sumOf(before, firstCol) === cellValue(totalRow, firstCol) &&
+    sumOf(allRows, firstCol) !== cellValue(totalRow, firstCol);
+  const dataRows = restated ? before : allRows;
   const cols = numericColumns(table).filter((c) => hasNumber(totalRow, c));
   if (cols.length === 0) return [];
 

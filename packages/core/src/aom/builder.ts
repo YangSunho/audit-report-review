@@ -382,8 +382,29 @@ function buildLines(
   const periodCols: number[] = [];
   for (let c = amountsStart; c <= maxCol; c++) periodCols.push(c);
   const half = Math.ceil(periodCols.length / 2);
-  const currentCols = periodCols.slice(0, half);
-  const priorCols = periodCols.slice(half);
+  let currentCols = periodCols.slice(0, half);
+  let priorCols = periodCols.slice(half);
+
+  // 반기·분기 보고서의 손익계산서는 한 기간이 두 열이다:
+  //   [제33(당)기 반기]        [제32(전)기 반기]
+  //   3개월 | 누적            3개월 | 누적
+  // 앞 열(3개월)을 그 기간의 값으로 잡으면 자본변동표·회계기간과 맞지 않는다.
+  // 실제로 반기보고서에서 총포괄손익이 3개월치로 잡혀 자본변동표 대사가 깨졌다.
+  // 소제목이 두 열을 구분하고 있으면 **누적** 열을 그 기간의 대표값으로 쓴다.
+  const cumulativeCol = (cols: number[]): number[] => {
+    for (const r of pt.rows) {
+      if (r.section !== "thead") continue;
+      const hit = cols.filter((c) => {
+        const t = (r.cells.find((x) => x.col === c)?.text ?? "").replace(/\s/g, "");
+        return /누적/.test(t);
+      });
+      // 누적 열이 정확히 하나일 때만 신뢰한다 — 애매하면 기존 규칙을 유지한다.
+      if (hit.length === 1) return [hit[0]!, ...cols.filter((c) => c !== hit[0])];
+    }
+    return cols;
+  };
+  currentCols = cumulativeCol(currentCols);
+  priorCols = cumulativeCol(priorCols);
 
   const firstNumber = (r: ParsedRow, cols: number[]): NormalizedNumber | undefined => {
     for (const col of cols) {

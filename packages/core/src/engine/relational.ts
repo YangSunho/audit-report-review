@@ -90,7 +90,10 @@ export function checkCashFlow(objects: AomObject[]): RelationalReport {
   const cfEnd = cfLine(lines, (a) => a.includes("기말") && a.includes("현금및현금성자산"));
   const cfBegin = cfLine(lines, (a) => a.includes("기초") && a.includes("현금및현금성자산"));
   const cfDelta = cfLine(lines, (a) => a.includes("현금및현금성자산의증가"));
-  const cfFx = cfLine(lines, (a) => a.includes("환율변동효과"));
+  // 표기가 제출사마다 다르다: "환율변동효과" · "현금및현금성자산의 환율변동으로 인한 효과".
+  // 좁게 잡으면 환율효과를 빼먹고 기초+증감=기말 이 그 금액만큼 어긋난 것으로 보고한다
+  // (반기보고서에서 Δ101,850,814 = 환율효과 전액이 그대로 불일치로 나왔다).
+  const cfFx = cfLine(lines, (a) => /환율변동/.test(a) && /효과/.test(a));
 
   // Cash tie-out: CF 기말현금 == BS 현금및현금성자산 (exact, both in 원).
   if (cfEnd && bsCash) {
