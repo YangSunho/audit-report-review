@@ -246,88 +246,151 @@ ${disclosed}
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>감사보고서 검토 결과 · ${esc(company ?? "")}</title>
 <style>
-:root{--ink900:#191919;--ink800:#3D3D3D;--ink700:#777;--ink300:#E0E0E0;--ink200:#EFEFEF;--ink100:#F7F7F7;
---red:#E5342F;--redbg:#FDECEB;--amber:#B4690E;--amberbg:#FDF3E3;--green:#137A45;--greenbg:#E9F6EE;--blue:#1D4ED8;--bluebg:#EAF1FE}
+/* 디자인 언어: 무채색 캔버스 + 절제된 의미색, 알약형 컨트롤, 두 종류의 카드 반경
+   (32px = 결과 선언 카드 / 16px = 내용 카드). 서체는 DM Sans 우선, 없으면 시스템 폰트.
+   폰트를 네트워크에서 받지 않는다 — 오프라인·폐쇄망에서도 동일하게 보여야 한다(§18). */
+:root{
+--ink:#111214;--ink-strong:#000;--charcoal:#2E3033;--slate:#5B5F66;--steel:#8A9098;--stone:#A8AEB6;--muted:#C2C7CE;
+--canvas:#fff;--surface:#F6F7F8;--surface-soft:#FAFBFC;--hairline:#E3E6EA;--hairline-soft:#EFF1F4;
+--red:#D45656;--red-ink:#A32E2E;--red-bg:#FDF0F0;
+--amber:#B4690E;--amber-bg:#FDF6E9;
+--green:#137A45;--green-bg:#E9F6EE;
+--blue:#1D4ED8;--blue-bg:#EAF1FE;
+--r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;--r-hero:28px;--r-full:9999px}
 *{box-sizing:border-box}
-body{margin:0;font-family:Pretendard,-apple-system,"Helvetica Neue",sans-serif;letter-spacing:-.01em;color:var(--ink900);background:#fff;font-size:15px;line-height:1.55}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px 56px}
-.top{display:flex;align-items:center;gap:12px;padding:18px 0;border-bottom:2px solid var(--ink900)}
-.brand{font-weight:900;font-size:22px;letter-spacing:-.03em}
-.brand small{display:block;font-size:12px;font-weight:600;color:var(--ink700);letter-spacing:0}
-.file{color:var(--ink800);font-size:15px;font-weight:700}
-.badge{font-size:11px;font-weight:800;padding:3px 8px;border:1px solid var(--ink900);border-radius:2px}
-.badge.grey{border:0;background:var(--ink100);color:#555}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 8px}
-.m{background:var(--ink100);padding:14px 16px;border-radius:4px}
-.m.good{background:var(--greenbg)} .m.warn{background:var(--amberbg)} .m.bad{background:var(--redbg)}
-.ml{font-size:12px;font-weight:700;color:var(--ink700)}
-.mv{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:2px}
-.mv.red{color:var(--red)} .mv.green{color:var(--green)} .mv.amber{color:var(--amber)}
-h2{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:34px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--ink300)}
-h3{font-size:16px;font-weight:800;letter-spacing:-.02em;margin:22px 0 8px}
-h3 .sub{font-weight:600;color:var(--ink700);font-size:13px;margin-left:8px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--ink200);vertical-align:top}
-th{background:var(--ink100);font-weight:800;font-size:13px;color:var(--ink800)}
-td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
-td.loc{color:var(--ink700);font-size:13px}
-td.how{color:var(--ink800);font-size:13px}
-.tag{font-size:12px;font-weight:800;padding:2px 8px;border-radius:3px;white-space:nowrap;display:inline-block}
-.s-ok{background:var(--greenbg);color:var(--green)}
-.s-rev{background:var(--amberbg);color:var(--amber)}
-.s-err{background:var(--red);color:#fff}
-.s-info{background:var(--ink100);color:#555}
-.up{color:var(--red);font-weight:800} .down{color:var(--blue);font-weight:800}
-.bar{display:inline-block;height:9px;border-radius:2px;vertical-align:middle;min-width:2px}
-.bar.p{background:var(--red)} .bar.n{background:var(--blue)}
-.barwrap{display:flex;align-items:center;gap:6px;justify-content:flex-end}
-.ins{border:1px solid var(--ink200);border-left:4px solid var(--amber);background:#FFFDF9;padding:12px 14px;margin:10px 0;border-radius:3px}
-.insq{font-weight:800;margin-bottom:6px;font-size:15px}
-.insr{color:var(--ink800);margin:3px 0;font-size:14px}
-.inse{margin:8px 0 0;padding-left:18px;color:var(--ink700);font-size:13px}
-.foot{margin-top:32px;color:var(--ink700);font-size:12px;border-top:1px solid var(--ink200);padding-top:12px}
-tr.hi td{background:#FFF8F7}
-p.lead{font-size:15px;color:var(--ink800);margin:6px 0 12px}
-details{margin-top:4px} summary{cursor:pointer;color:var(--blue);font-size:13px;font-weight:700}
-details p{margin:6px 0 0;color:var(--ink800);font-size:13px}
-.qcard{border:1px solid var(--ink300);border-left:4px solid var(--red);border-radius:3px;padding:12px 14px;margin:10px 0;background:#FFFCFC}
-.qcard:nth-child(even){background:#fff}
-.qhead{font-size:13px;color:var(--ink800);margin-bottom:6px}
-.qarea{color:var(--ink700);font-size:12px}
-.qq{font-size:15px;font-weight:800;margin:4px 0 6px;line-height:1.5}
-.qb{font-size:13px;color:var(--ink800);font-variant-numeric:tabular-nums}
-.qp{font-size:13px;color:var(--blue);margin-top:4px}
-.disc{border:1px solid var(--ink300);border-left:4px solid var(--green);background:#F8FCF9;padding:12px 14px;margin:10px 0;border-radius:3px}
-.disc.warn2{border-left-color:var(--red);background:var(--redbg)}
-.disc p{margin:6px 0 0;font-size:14px;color:var(--ink800)}
-.disc p.cov{color:var(--green);font-weight:700;font-size:13px}
-td.q{font-size:13px;color:var(--blue)}
-ul.links{font-size:14px;line-height:2}
-ul.links a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px solid var(--bluebg)}
-ul.links a:hover{border-bottom-color:var(--blue)}
-code.copy{background:var(--bluebg);color:var(--blue);border:1px solid var(--blue);border-radius:3px;
-padding:1px 7px;font-family:inherit;font-weight:800;cursor:pointer}
-code.copy:hover{background:var(--blue);color:#fff}
-code.copy.done{background:var(--greenbg);color:var(--green);border-color:var(--green)}
-.hint{color:var(--ink700);font-size:12px;font-weight:400}
-.period{margin:2px 0 14px;font-size:14px;color:var(--ink800);font-weight:700;font-variant-numeric:tabular-nums}
-.period .cav{display:block;margin-top:4px;font-weight:600;font-size:13px;color:var(--red)}
-.credit{margin-top:26px;padding-top:14px;border-top:1px solid var(--ink300);
-font-size:12px;color:var(--ink700);line-height:1.9}
-.credit a{color:var(--ink700)}
+body{margin:0;background:var(--canvas);color:var(--ink);
+font-family:"DM Sans",Inter,Pretendard,-apple-system,"Malgun Gothic","맑은 고딕",sans-serif;
+font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px 96px}
+
+/* ── 상단 내비게이션 ─────────────────────────────────────────────── */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;
+padding:16px 0;margin-bottom:40px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+border-bottom:1px solid var(--hairline-soft)}
+.brand{font-size:16px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:baseline;gap:9px}
+.brand small{font-size:12px;font-weight:500;color:var(--steel);letter-spacing:0}
+.badge{font-size:12px;font-weight:600;padding:5px 12px;border-radius:var(--r-full);
+background:var(--surface);color:var(--slate);border:1px solid var(--hairline)}
+.badge.grey{background:transparent}
+
+/* ── 히어로: 대상과 결론을 먼저 선언한다 ─────────────────────────── */
+.hero{border-radius:var(--r-hero);padding:40px 44px;margin-bottom:14px;
+background:var(--ink);color:#fff}
+.hero.bad{background:var(--red)}
+.hero.warn{background:#1B1D20}
+.hero .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
+.hero h1{margin:10px 0 0;font-size:44px;font-weight:600;line-height:1.1;letter-spacing:-1.4px}
+.period{margin:14px 0 0;font-size:15px;font-weight:500;opacity:.78;font-variant-numeric:tabular-nums}
+.period .cav{display:block;margin-top:8px;font-size:13px;font-weight:600;
+background:rgba(255,255,255,.14);border-radius:var(--r-full);padding:6px 14px;display:inline-block}
+.verdict{margin-top:26px;font-size:19px;font-weight:600;line-height:1.45;letter-spacing:-.3px}
+
+/* ── 지표 스트립 ─────────────────────────────────────────────────── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 48px}
+.m{background:var(--surface);border-radius:var(--r-xl);padding:22px 24px}
+.m.bad{background:var(--red-bg)}
+.m.good{background:var(--green-bg)}
+.m.warn{background:var(--amber-bg)}
+.ml{font-size:12px;font-weight:600;color:var(--steel);letter-spacing:.01em}
+.mv{font-size:34px;font-weight:600;letter-spacing:-1px;line-height:1.15;margin-top:6px;font-variant-numeric:tabular-nums}
+.mv.red{color:var(--red-ink)}.mv.green{color:var(--green)}.mv.amber{color:var(--amber)}
+
+/* ── 섹션 ────────────────────────────────────────────────────────── */
+h2{font-size:26px;font-weight:600;letter-spacing:-.6px;line-height:1.25;margin:64px 0 6px;
+padding-top:26px;border-top:1px solid var(--hairline)}
+h2 .n{display:inline-block;min-width:30px;color:var(--stone);font-variant-numeric:tabular-nums}
+h3{font-size:17px;font-weight:600;letter-spacing:-.2px;margin:32px 0 10px}
+h3 .sub{font-size:13px;font-weight:500;color:var(--steel);letter-spacing:0}
+.lead{color:var(--slate);font-size:14px;margin:0 0 20px;max-width:760px;line-height:1.6}
+
+/* ── 표 ──────────────────────────────────────────────────────────── */
+table{width:100%;border-collapse:separate;border-spacing:0;margin:0 0 8px;font-size:13.5px;
+border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden}
+thead th{background:var(--surface);color:var(--steel);font-size:12px;font-weight:600;
+text-align:left;padding:12px 16px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+td{padding:13px 16px;border-bottom:1px solid var(--hairline-soft);vertical-align:top;color:var(--charcoal)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.hi{background:var(--surface-soft)}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink);font-weight:500}
+.src,.loc{color:var(--steel);font-size:12px;line-height:1.5}
+.up{color:var(--red-ink);font-weight:600}.down{color:var(--blue);font-weight:600}
+
+/* ── 배지 ────────────────────────────────────────────────────────── */
+.tag{display:inline-block;font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:var(--r-full);white-space:nowrap}
+.s-ok{background:var(--green-bg);color:var(--green)}
+.s-rev{background:var(--amber-bg);color:var(--amber)}
+.s-err{background:var(--red-bg);color:var(--red-ink)}
+.s-info{background:var(--surface);color:var(--slate)}
+
+/* ── 증감 막대 ───────────────────────────────────────────────────── */
+.barwrap{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.bar{display:inline-block;height:6px;border-radius:var(--r-full)}
+.bar.p{background:var(--red)}.bar.n{background:var(--blue)}
+
+/* ── 카드류 ──────────────────────────────────────────────────────── */
+.disc{border:1px solid var(--hairline);border-left:3px solid var(--green);background:var(--canvas);
+padding:18px 22px;margin:0 0 22px;border-radius:var(--r-xl)}
+.disc.warn2{border-left-color:var(--red);background:var(--red-bg);border-color:#F4DADA}
+.disc b{font-size:15px;letter-spacing:-.2px}
+.disc p{margin:8px 0 0;font-size:13.5px;color:var(--charcoal);line-height:1.6}
+.disc p.cov{color:var(--green);font-weight:600;font-size:13px}
+
+.qcard{border:1px solid var(--hairline);border-radius:var(--r-xl);padding:22px 24px;margin:0 0 12px;background:var(--canvas)}
+.qhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12.5px;color:var(--steel);margin-bottom:10px}
+.qarea{font-weight:600}
+.qq{font-size:17px;font-weight:600;line-height:1.45;letter-spacing:-.3px;margin:0 0 10px}
+.qb{font-size:13.5px;color:var(--charcoal);font-variant-numeric:tabular-nums;line-height:1.6}
+.qp{font-size:13.5px;color:var(--blue);font-weight:500;margin-top:8px}
+
+.ins{border:1px solid var(--hairline);border-radius:var(--r-xl);padding:20px 22px;margin:0 0 12px}
+.insq{font-size:16px;font-weight:600;letter-spacing:-.2px;margin-bottom:10px;line-height:1.45}
+.insr{font-size:13.5px;color:var(--charcoal);margin:4px 0;line-height:1.6}
+.inse{margin:10px 0 0;padding-left:18px;font-size:12.5px;color:var(--steel);line-height:1.7}
+
+/* ── 링크·복사 칩 ────────────────────────────────────────────────── */
+ul.links{font-size:14px;line-height:2.1;padding-left:18px}
+ul.links a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1.5px solid var(--hairline)}
+ul.links a:hover{border-bottom-color:var(--ink)}
+code.copy{background:var(--ink);color:#fff;border:none;border-radius:var(--r-full);
+padding:4px 13px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-block}
+code.copy.done{background:var(--green-bg);color:var(--green)}
+.hint{color:var(--steel);font-size:12px;font-weight:400}
+td.q{color:var(--blue);font-weight:500;font-size:12.5px}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--slate);font-size:12.5px;font-weight:500}
+.how{font-size:13px;color:var(--charcoal);line-height:1.6}
+
+/* ── 바닥글 ──────────────────────────────────────────────────────── */
+.foot{margin-top:72px;padding:28px 32px;border-radius:var(--r-xl);background:var(--surface);
+color:var(--steel);font-size:12px;line-height:1.9;word-break:break-all}
+.credit{margin-top:12px;padding:28px 32px;border-radius:var(--r-xl);background:var(--ink);
+color:rgba(255,255,255,.66);font-size:12px;line-height:1.9}
+.credit b{color:#fff;font-weight:600}
+
+@media print{.top{position:static;background:none}h2{break-after:avoid}table{break-inside:avoid}}
+@media(max-width:900px){
+.wrap{padding:0 18px 64px}.metrics{grid-template-columns:repeat(2,1fr)}
+.hero{padding:30px 26px;border-radius:20px}.hero h1{font-size:30px;letter-spacing:-.8px}
+h2{font-size:21px}.mv{font-size:27px}}
 </style></head><body><div class="wrap">
-<div class="top"><span class="brand">감사보고서 검토 결과<small>ARI 자동 검토 엔진</small></span>
-<span class="file">${esc(company ?? "")} · ${esc(docName ?? "")}</span>
+<div class="top"><span class="brand">ARI<small>감사보고서 검토</small></span>
 <span style="margin-left:auto"></span><span class="badge">내 PC에서 처리</span><span class="badge grey">원본 미변경</span></div>
 
-${
-  // 기수·회계기간·결산일 — 어느 기의 검토인지 밝히지 않으면 조서로 쓸 수 없다.
-  fiscal
-    ? `<div class="period">${esc(fiscal.label)}${
-        fiscal.caveat ? `<span class="cav">${esc(fiscal.caveat)}</span>` : ""
-      }</div>`
-    : ""
-}
+${(() => {
+  // 히어로 — 무엇을, 어느 기간에 대해 검토했고, 결론이 무엇인지를 먼저 선언한다.
+  // 감사인이 조서에 붙였을 때 이 한 장으로 대상과 결과가 특정되어야 한다.
+  const bad = s.mismatches > 0;
+  const verdict = bad
+    ? `기계가 확정한 오류 ${s.mismatches}건이 있습니다. 원문 확인이 필요합니다.`
+    : s.issues.review > 0
+      ? `기계가 확정한 오류는 없습니다. 확인이 권장되는 항목 ${s.issues.review}건을 아래에 정리했습니다.`
+      : `수행한 검증 ${s.total.toLocaleString()}건이 모두 일치했습니다.`;
+  return `<div class="hero ${bad ? "bad" : s.issues.review > 0 ? "warn" : ""}">
+<div class="eyebrow">${esc(docName ?? "감사보고서")} 검토 결과</div>
+<h1>${esc(company ?? "")}</h1>
+${fiscal ? `<div class="period">${esc(fiscal.label)}${fiscal.caveat ? `<span class="cav">${esc(fiscal.caveat)}</span>` : ""}</div>` : ""}
+<div class="verdict">${esc(verdict)}</div></div>`;
+})()}
 
 ${(() => {
   // 인식 진단 — 결과를 보여주기 전에 "얼마나 읽었는지"부터 밝힌다.
@@ -335,26 +398,26 @@ ${(() => {
   const h = assessParseHealth(model);
   const gapNote =
     h.noteGaps.length > 0
-      ? `<p style="color:var(--ink700);font-size:13px">주석 번호 ${h.noteGaps.join("·")}번은 원문에 없습니다 — 제출사가 번호를 건너뛴 경우가 대부분이며, 원문을 확인해 실제 누락인지 판단하십시오.</p>`
+      ? `<p style="color:var(--steel);font-size:13px">주석 번호 ${h.noteGaps.join("·")}번은 원문에 없습니다 — 제출사가 번호를 건너뛴 경우가 대부분이며, 원문을 확인해 실제 누락인지 판단하십시오.</p>`
       : "";
-  const facts = `<p style="color:var(--ink700);font-size:13px">인식 결과 — 재무제표 ${h.statements.join("·") || "없음"} · 계정 ${h.fsLines.toLocaleString()}개(전기 비교 ${h.withPrior.toLocaleString()}개) · 주석 ${h.notes}개 · 표 ${h.tables.toLocaleString()}개</p>`;
+  const facts = `<p style="color:var(--steel);font-size:13px">인식 결과 — 재무제표 ${h.statements.join("·") || "없음"} · 계정 ${h.fsLines.toLocaleString()}개(전기 비교 ${h.withPrior.toLocaleString()}개) · 주석 ${h.notes}개 · 표 ${h.tables.toLocaleString()}개</p>`;
   if (h.level === "ok" && h.noteGaps.length === 0) {
     return `<div class="disc"><b>${esc(h.headline)}</b>${facts}</div>`;
   }
   const items = h.findings
-    .map((f) => `<p><b>${esc(f.what)}</b><br><span style="color:var(--ink700)">${esc(f.impact)}</span></p>`)
+    .map((f) => `<p><b>${esc(f.what)}</b><br><span style="color:var(--slate)">${esc(f.impact)}</span></p>`)
     .join("");
   return `<div class="disc ${h.level === "ok" ? "" : "warn2"}"><b>${esc(h.headline)}</b>${items}${gapNote}${facts}</div>`;
 })()}
 
 <div class="metrics">
-<div class="m"><div class="ml">검증 일치율</div><div class="mv green">${score}%</div></div>
-<div class="m ${s.issues.review > 0 ? "warn" : ""}"><div class="ml">확인이 필요한 항목</div><div class="mv ${s.issues.review > 0 ? "amber" : ""}">${s.issues.review}건</div></div>
-<div class="m ${s.mismatches > 0 ? "bad" : "good"}"><div class="ml">불일치(오류)</div><div class="mv ${s.mismatches > 0 ? "red" : "green"}">${s.mismatches}건</div></div>
-<div class="m"><div class="ml">수행한 검증</div><div class="mv">${s.total}건</div></div>
+<div class="m ${s.mismatches > 0 ? "bad" : "good"}"><div class="ml">확정 오류</div><div class="mv ${s.mismatches > 0 ? "red" : "green"}">${s.mismatches.toLocaleString()}</div></div>
+<div class="m ${s.issues.review > 0 ? "warn" : ""}"><div class="ml">확인 권장</div><div class="mv ${s.issues.review > 0 ? "amber" : ""}">${s.issues.review.toLocaleString()}</div></div>
+<div class="m"><div class="ml">수행한 검증</div><div class="mv">${s.total.toLocaleString()}</div></div>
+<div class="m"><div class="ml">검증 일치율</div><div class="mv">${score}%</div></div>
 </div>
 
-<h2>1. 심리실 예상 질의 <span style="font-size:13px;font-weight:600;color:var(--ink700)">— 제출 전 준비 사항 ${queries.length}건</span></h2>
+<h2><span class="n">1</span> 심리실 예상 질의 <span class="sub" style="font-size:14px;font-weight:500;color:var(--steel)">제출 전 준비 사항 ${queries.length}건</span></h2>
 <p class="lead">유의적 변동과 재무제표 간 관계를 근거로, 심리 단계에서 제기될 가능성이 높은 질문을 정리했습니다.</p>
 ${
   queryCards ||
@@ -362,28 +425,28 @@ ${
     const d = diagnoseQueries(model);
     return `<div class="disc warn2"><b>예상 질의를 생성하지 못했습니다</b>
 <p>${esc(d.reason ?? "원인을 특정하지 못했습니다.")}</p>
-<p style="color:var(--ink700);font-size:13px">인식 결과 — 재무제표 계정 ${d.fsLines}개 · 전기 비교 있는 계정 ${d.withPrior}개 · 유의적 변동 ${d.significant}개</p></div>`;
+<p style="color:var(--steel);font-size:13px">인식 결과 — 재무제표 계정 ${d.fsLines}개 · 전기 비교 있는 계정 ${d.withPrior}개 · 유의적 변동 ${d.significant}개</p></div>`;
   })()
 }
 
-<h2>2. 보고기간후사건 점검 <span style="font-size:13px;font-weight:600;color:var(--ink700)">— K-IFRS 1010</span></h2>
+<h2><span class="n">2</span> 보고기간후사건 점검 <span class="sub" style="font-size:14px;font-weight:500;color:var(--steel)">K-IFRS 1010</span></h2>
 ${subsequentHtml || "<p>파싱 정보가 없어 점검을 수행하지 못했습니다.</p>"}
 
-<h2>3. 확인이 필요한 항목</h2>
+<h2><span class="n">3</span> 확인이 필요한 항목</h2>
 <p class="lead">아래는 오류로 단정한 것이 아니라, 감사인의 확인이 권장되는 사항입니다.</p>
 <table><thead><tr><th>구분</th><th>항목</th><th>내용</th><th>위치</th></tr></thead><tbody>${issueRows || '<tr><td colspan="4">확인이 필요한 항목이 없습니다.</td></tr>'}</tbody></table>
 
-<h2>4. 검토 질문</h2>
+<h2><span class="n">4</span> 검토 질문</h2>
 ${insightCards || "<p>생성된 질문이 없습니다.</p>"}
 
-<h2>5. 재무제표 정합성 · 현금 대사</h2>
+<h2><span class="n">5</span> 재무제표 정합성 · 계층 · 연계성</h2>
 <table><thead><tr><th>검증</th><th>항목</th><th>기대</th><th>실제</th><th>판정</th><th>비고</th></tr></thead><tbody>${fsRows}</tbody></table>
 
-<h2>6. 증감분석 (당기 vs 전기)</h2>
+<h2><span class="n">6</span> 증감분석 (당기 vs 전기)</h2>
 <p class="lead">전기 대비 변동이 큰 계정을 표시했습니다. <span class="up">붉은색</span>은 증가, <span class="down">파란색</span>은 감소입니다.</p>
 ${varianceHtml}
 
-<h2>7. 검토 수행 내역</h2>
+<h2><span class="n">7</span> 검토 수행 내역</h2>
 <p class="lead">검토 대상 <b>${cov.items}개 항목</b>에 총 <b>${cov.checks}건</b>의 검증을 수행했으며, 그중 <b>${cov.clean}개 항목</b>은 모든 검증이 일치했습니다. 각 행의 "검증 방법"을 펼치면 무엇을 어떻게 대조했는지 확인할 수 있습니다.</p>
 <table><thead><tr><th style="width:30%">항목</th><th>수행한 검증 → 결과</th><th>판정</th><th style="width:22%">위치</th></tr></thead><tbody>${coverageRows}</tbody></table>
 
