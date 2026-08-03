@@ -6,6 +6,7 @@
 import type { AomObject, FinancialStatementLine, ReviewResult } from "../aom/types.js";
 import { ENGINE_VERSION } from "./types.js";
 import { fmtWon } from "../labels.js";
+import { checkFsHierarchyAndTieOut } from "./hierarchy.js";
 
 const MILLION = 1_000_000;
 
@@ -43,18 +44,18 @@ function mk(
 }
 
 export function checkFsIntegrity(objects: AomObject[]): ReviewResult[] {
-  const bs = objects.filter(
-    (o): o is FinancialStatementLine =>
-      o.objectType === "FinancialStatementLine" && o.statement === "BS",
+  const allLines = objects.filter(
+    (o): o is FinancialStatementLine => o.objectType === "FinancialStatementLine",
   );
-  const is = objects.filter(
-    (o): o is FinancialStatementLine =>
-      o.objectType === "FinancialStatementLine" && o.statement === "IS",
-  );
+  const bs = allLines.filter((l) => l.statement === "BS");
+  const is = allLines.filter((l) => l.statement === "IS");
   const doc = objects.find((o) => o.objectType === "Document");
   const extractions = doc?.objectType === "Document" ? doc.extractions : {};
 
   const out: ReviewResult[] = [];
+
+  // [신규] 4대 재무제표 전수 계층 Footing 및 Tie-out 검증 연동
+  out.push(...checkFsHierarchyAndTieOut(allLines));
 
   const assetTotal = findLine(bs, (a) => a.includes("자산총계"));
   const liabTotal = findLine(bs, (a) => a === "부채총계");
@@ -127,3 +128,4 @@ export function checkFsIntegrity(objects: AomObject[]): ReviewResult[] {
 
   return out;
 }
+
