@@ -186,7 +186,7 @@ export function renderHtmlDashboard(
       .join("");
     // DART's search form submits via JavaScript, so a URL query cannot pre-run
     // the search — the page would open empty. Instead give the exact trade name
-    // to paste (DART matches the trade name only: "영풍전자 주식회사" finds nothing)
+    // to paste (DART matches the trade name only: "○○전자 주식회사" finds nothing)
     // with a copy button. News search does work as a direct query link.
     const co = searchName(se.company) || (se.company ?? "");
     const dartUrl = `https://dart.fss.or.kr/dsab001/main.do`;

@@ -196,7 +196,7 @@ export function checkRollForward(
     // distinguish these from a true error without professional judgment. So a
     // failing roll-forward is ALWAYS surfaced as `review` (질문 생성), never a
     // machine-certified `mismatch`. This keeps 기계 오탐 0 on filed consolidated
-    // reports where per-subsidiary rounding accumulates (e.g. 인터플렉스 연결 PPE
+    // reports where per-subsidiary rounding accumulates (e.g. 표본 A 연결 PPE
     // 건설중인자산 Δ191천원, 무형자산 Δ410천원 — immaterial residuals).
 
     // Does this segment already carry explicit signs? If ANY movement is printed

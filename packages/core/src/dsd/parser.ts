@@ -1,7 +1,7 @@
 // DSD container + XML parsing. Spec: 03_DSD_Intelligence_Engine_Spec.md §2–§3.
 // §7: original is read-only; extract into a temp dir only; record & verify hash.
 //
-// VERIFIED container (인터플렉스 2025 sample): .dsd is a ZIP containing
+// VERIFIED container (표본 A (2025 감사보고서)): .dsd is a ZIP containing
 //   contents.xml (utf-8, body), meta.xml (schema=dart4.xsd, docver 6.0), *.jpg.
 // VERIFIED contents.xml vocabulary (DART dart4):
 //   DOCUMENT > DOCUMENT-HEADER > SUMMARY(EXTRACTION[ACODE]) > BODY
@@ -220,7 +220,7 @@ export interface ParsedDocument {
   schema?: string; // from meta.xml GENERATOR (dart4.xsd)
   docVersion?: string; // DOCUMENT-INFO docver
   docName?: string; // 감사보고서
-  company?: string; // 인터플렉스
+  company?: string; // 표본 A
   formulaVersion?: string; // 6.0
   extractions: Record<string, string>; // SUMMARY EXTRACTION ACODE -> value
   pageCount: number; // total pages (pageBreaks + 1)

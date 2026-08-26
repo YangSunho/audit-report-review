@@ -110,7 +110,7 @@ const flatten = (s: ParsedSection, out: { text: string }[] = []): { text: string
 
 /**
  * Company name as DART expects it. DART matches on the trade name only, so
- * "영풍전자 주식회사" finds nothing — the legal-form words (주식회사/(주)/㈜,
+ * "○○전자 주식회사" finds nothing — the legal-form words (주식회사/(주)/㈜,
  * 유한회사, 유한책임회사 …) must be stripped, whether they lead or trail.
  */
 export function searchName(company: string | undefined): string {

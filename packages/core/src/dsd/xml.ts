@@ -1,6 +1,6 @@
 // Minimal, dependency-free XML parser for DART dart4 contents.xml (Doc 03 §2.2.1, §3.2).
 //
-// The DART body XML is well-formed and constrained (verified on the 인터플렉스 2025
+// The DART body XML is well-formed and constrained (verified on the 표본 A
 // sample): a single <?xml?> declaration, no comments, no CDATA, no self-closing
 // tags, and only the standard entities &amp; &lt; &gt; &quot; &apos;. This parser
 // is intentionally small and deterministic (§19); it is NOT a general XML engine.

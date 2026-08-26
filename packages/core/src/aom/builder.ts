@@ -506,7 +506,7 @@ function parseNoteHeading(
 function scanNoteHeadings(blocks: ParsedBlock[]): Map<ParsedBlock, { no: string; title: string }> {
   const map = new Map<ParsedBlock, { no: string; title: string }>();
   // Note numbers must ASCEND but need not be contiguous: filers legitimately
-  // skip numbers (리클린: 1, 2, 4, 5 … — no note 3). Requiring last+1 stopped at
+  // skip numbers (표본 E: 1, 2, 4, 5 … — no note 3). Requiring last+1 stopped at
   // the first gap and left the report with almost no notes, which in turn broke
   // note-linked evidence everywhere. Allow gaps; still reject decreases, which
   // would mean we are re-reading list items inside a note body ("1) …").

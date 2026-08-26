@@ -2,7 +2,7 @@
 // reads the layout instantly, code must infer it. Rather than assume one shape,
 // we detect structural features first and let each check branch on them.
 //
-// Measured on the 인터플렉스 2025 표본 (130 note tables):
+// Measured on the 표본 A (2025 감사보고서) (130 note tables):
 //   기간 2단(당기/전기)  62 · 다단헤더(2행+) 48 · 비금액 단위 혼재 46
 //   colspan 헤더        27 · 전치형 롤포워드 16 · 계층 들여쓰기 4
 //

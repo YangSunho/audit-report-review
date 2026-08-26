@@ -165,7 +165,7 @@ export type SectionKind = "COVER" | "TOC" | "SECTION-1" | "SECTION-2" | "BODY";
 export interface AomDocument extends AomBase {
   objectType: "Document";
   docName?: string; // 감사보고서
-  company?: string; // 인터플렉스
+  company?: string; // 표본 A
   schema?: string; // dart4.xsd
   docVersion?: string; // 6.0
   extractions: Record<string, string>; // SUMMARY EXTRACTION anchors (§ FS Integrity seed)
