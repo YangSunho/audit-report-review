@@ -1,0 +1,39 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARI — 비교로 이동합니다</title>
+<!--
+  예전 주소(/compare/)로 들어온 사람을 통합본의 비교 화면으로 보낸다.
+
+  GitHub Pages 는 서버 단계의 리다이렉트를 걸 수 없다. 그래서 meta refresh 와
+  스크립트를 함께 둔다 — 둘 중 하나만 살아 있어도 넘어가고, 둘 다 막혀도
+  본문의 링크가 남는다. 이미 공유된 주소를 404 로 만들지 않는 것이 먼저다.
+-->
+<meta http-equiv="refresh" content="0; url=../#diff">
+<link rel="canonical" href="../">
+<style>
+:root{--parchment:#f2f0eb;--paper:#fff;--mist:#e3e3e2;--charcoal:#292827;--stone:#666;
+  --wine:#421d24;--lilac:#d4c7ff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--parchment);color:var(--charcoal);display:grid;place-items:center;
+  font-family:"Pretendard Variable",Pretendard,Inter,-apple-system,BlinkMacSystemFont,
+    "Segoe UI","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-weight:460;line-height:1.5;padding:24px}
+.box{background:var(--paper);border:1px solid var(--mist);border-radius:16px;
+  padding:40px 44px;max-width:520px;text-align:center}
+h1{font-size:32px;font-weight:460;letter-spacing:-.02em;margin:0 0 12px}
+p{font-size:16px;color:var(--stone);margin:0 0 26px}
+a.go{display:inline-block;background:var(--wine);color:#fff;text-decoration:none;
+  border-radius:16px;padding:13px 26px;font-size:16px;font-weight:460}
+a.go:hover{background:#59262f}
+.tag{display:inline-block;background:var(--lilac);border-radius:999px;padding:4px 12px;
+  font-size:13px;margin-bottom:18px}
+</style></head><body>
+<div class="box">
+  <span class="tag">주소가 바뀌었습니다</span>
+  <h1>검토와 비교가 하나로 합쳐졌습니다</h1>
+  <p>비교 도구는 이제 ARI 안에 있습니다. 잠시 뒤 자동으로 넘어갑니다.</p>
+  <a class="go" href="../#diff">ARI 비교로 이동 →</a>
+</div>
+<script>location.replace('../#diff');</script>
+</body></html>

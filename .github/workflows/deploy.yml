@@ -1,5 +1,9 @@
-# 소스를 고쳐 push 하면 → 여기서 앱을 빌드하고 → GitHub Pages 에 자동 배포한다.
-# 사용자는 Node 나 pnpm 을 설치할 필요가 없다. 빌드는 전부 GitHub 서버에서 일어난다.
+# push 하면 → 미리 만들어 둔 단일 파일 앱을 GitHub Pages 에 그대로 올린다.
+#
+# 빌드를 여기서 하지 않는 이유: 통합본(검토+비교)은 두 엔진을 한 파일로 묶은 것이라
+# 두 소스 트리가 모두 있어야 만들어진다. 그런데 이 저장소는 공개용이라 감사 자료와
+# 시험 자료를 담지 않는다. 그래서 **로컬에서 검증을 마친 파일 그대로** 올린다 —
+# 빌드 실패로 배포가 막힐 일이 없고, 확인한 그 파일이 그대로 서비스된다.
 name: 배포 (build & deploy to Pages)
 
 on:
@@ -25,40 +29,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 버전을 여기서 지정하지 않는다 — package.json 의 "packageManager": "pnpm@9.0.0"
-      # 이 이미 버전을 못박고 있어, 둘 다 쓰면 action 이 충돌로 실패한다.
-      # 버전은 package.json 한 곳에서만 관리한다.
-      - uses: pnpm/action-setup@v4
-
-      # cache: pnpm 을 쓰지 않는다 — 잠금파일(pnpm-lock.yaml)을 커밋하지 않으므로
-      # 캐시 키를 만들지 못해 "Dependencies lock file is not found" 로 실패한다.
-      # 의존성이 esbuild·typescript 뿐이라 설치는 몇 초면 끝난다.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: 의존성 설치
-        run: pnpm install --no-frozen-lockfile
-
-      - name: 타입 검사 (엔진)
-        run: pnpm --filter @ari/core build
-
-      - name: 단일 파일 앱 빌드
-        run: pnpm --filter @ari/app run build:standalone
-
       - name: Pages 로 낼 파일 모으기
         run: |
           mkdir -p _site
-          # 주소로 열면 바로 앱이 뜨도록 index.html 로 놓는다.
-          cp "감사보고서_검토.html" _site/index.html
-          # 내려받아 오프라인·폐쇄망에서 쓰고 싶은 사람을 위해 원래 이름으로도 둔다.
-          cp "감사보고서_검토.html" "_site/감사보고서_검토.html"
-          test -f README.md && cp README.md _site/README.md || true
-          # DSD 비교앱 — 소스를 빌드하지 않고 미리 만들어 둔 파일을 그대로 올린다.
-          # 파일 하나로 완결되어 있어 빌드가 필요 없고, 빌드 실패로 배포가 막힐 일도 없다.
+          # 주소를 열면 바로 앱이 뜬다. 검토와 비교가 이 한 파일 안에 있다.
+          cp "앱/감사보고서_도구.html" _site/index.html
+          cp "앱/감사보고서_도구.html" "_site/감사보고서_도구.html"
+
+          # 예전에 공유된 내려받기 주소가 죽지 않게 같은 파일을 옛 이름으로도 둔다.
+          # 옛 이름으로 받아도 최신 통합본을 얻는다.
+          cp "앱/감사보고서_도구.html" "_site/감사보고서_검토.html"
+
+          # 예전 비교앱 주소(/compare/)로 들어온 사람은 통합본의 비교 화면으로 보낸다.
           mkdir -p _site/compare
-          cp "비교앱/감사보고서_비교.html" _site/compare/index.html
-          cp "비교앱/감사보고서_비교.html" "_site/compare/감사보고서_비교.html"
+          cp "앱/compare-redirect.html" _site/compare/index.html
+          cp "앱/감사보고서_도구.html" "_site/compare/감사보고서_비교.html"
+
+          test -f README.md && cp README.md _site/README.md || true
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
